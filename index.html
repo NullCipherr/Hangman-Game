@@ -7,12 +7,57 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light-theme {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        body.dark-theme {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+        header {
+            background-color: #4CAF50;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-decoration: none;
+        }
+        .menu-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        #novoJogo, #tema-toggle, #categoria {
+            font-size: 16px;
+            padding: 8px 15px;
+            background-color: #45a049;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #novoJogo:hover, #tema-toggle:hover, #categoria:hover {
+            background-color: #3d8b3d;
         }
         main {
             flex: 1;
@@ -21,10 +66,6 @@
             align-items: center;
             padding: 20px;
         }
-        h1 {
-            color: #333;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
         #game-info {
             display: flex;
             justify-content: space-between;
@@ -32,7 +73,7 @@
             max-width: 500px;
             margin-bottom: 20px;
         }
-        #pontuacao, #tempo {
+        #pontuacao, #tempo, #categoria-atual {
             font-size: 18px;
             font-weight: bold;
         }
@@ -40,20 +81,29 @@
             width: 300px;
             height: 300px;
             margin: 20px auto;
-            background-color: white;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+        .light-theme #forca {
+            background-color: white;
+        }
+        .dark-theme #forca {
+            background-color: #444;
+        }
         #forca line, #forca circle, #forca path {
-            stroke: #333;
             stroke-width: 3;
             fill: none;
+        }
+        .light-theme #forca line, .light-theme #forca circle, .light-theme #forca path {
+            stroke: #333;
+        }
+        .dark-theme #forca line, .dark-theme #forca circle, .dark-theme #forca path {
+            stroke: #f0f0f0;
         }
         #palavra {
             font-size: 32px;
             margin: 20px 0;
             letter-spacing: 5px;
-            color: #444;
         }
         #letras {
             max-width: 500px;
@@ -66,13 +116,19 @@
             height: 40px;
             border: none;
             border-radius: 50%;
-            background-color: #4CAF50;
-            color: white;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        #letras button:hover {
+        .light-theme #letras button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .dark-theme #letras button {
             background-color: #45a049;
+            color: #f0f0f0;
+        }
+        #letras button:hover {
+            opacity: 0.8;
         }
         #letras button:disabled {
             background-color: #cccccc;
@@ -82,20 +138,6 @@
             font-size: 24px;
             margin-top: 20px;
             font-weight: bold;
-            color: #333;
-        }
-        #novoJogo {
-            font-size: 18px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        #novoJogo:hover {
-            background-color: #45a049;
         }
         footer {
             background-color: #333;
@@ -116,13 +158,35 @@
         }
     </style>
 </head>
-<body>
+<body class="light-theme">
+    <header>
+        <div id="menu">
+            <a href="#" class="logo">Hangman</a>
+            <div class="menu-buttons">
+                <button id="novoJogo">Novo Jogo</button>
+                <select id="categoria">
+                    <option value="todas">Todas as Categorias</option>
+                    <option value="animais">Animais</option>
+                    <option value="frutas">Frutas</option>
+                    <option value="paises">Países</option>
+                    <option value="profissoes">Profissões</option>
+                    <option value="esportes">Esportes</option>
+                    <option value="tecnologia">Tecnologia</option>
+                    <option value="cores">Cores</option>
+                    <option value="instrumentos">Instrumentos Musicais</option>
+                    <option value="elementos">Elementos Químicos</option>
+                    <option value="planetas">Planetas</option>
+                </select>
+                <button id="tema-toggle">Alternar Tema</button>
+            </div>
+        </div>
+    </header>
+
     <main>
-        <h1>Hangman Game</h1>
-        
         <div id="game-info">
             <div id="pontuacao">Pontuação: <span id="pontos">0</span></div>
             <div id="tempo">Tempo: <span id="segundos">60</span>s</div>
+            <div id="categoria-atual">Categoria: <span id="nome-categoria">Todas</span></div>
         </div>
         
         <svg id="forca" viewBox="0 0 300 300">
@@ -167,8 +231,6 @@
         <div id="letras"></div>
         
         <div id="mensagem"></div>
-        
-        <button id="novoJogo">Novo Jogo</button>
     </main>
 
     <footer>
@@ -177,28 +239,19 @@
     </footer>
 
     <script>
-        const palavras = [
-            // Animais
-            'CACHORRO', 'GATO', 'ELEFANTE', 'LEAO', 'GIRAFA', 'ZEBRA', 'TIGRE', 'MACACO', 'PINGUIM', 'BALEIA',
-            // Frutas
-            'BANANA', 'MORANGO', 'ABACAXI', 'LARANJA', 'UVA', 'MELANCIA', 'KIWI', 'MANGA', 'PERA', 'CEREJA',
-            // Países
-            'BRASIL', 'PORTUGAL', 'FRANCA', 'ALEMANHA', 'ITALIA', 'ESPANHA', 'JAPAO', 'CHINA', 'AUSTRALIA', 'CANADA',
-            // Profissões
-            'MEDICO', 'PROFESSOR', 'ENGENHEIRO', 'ADVOGADO', 'COZINHEIRO', 'BOMBEIRO', 'POLICIAL', 'DENTISTA', 'ARQUITETO', 'JORNALISTA',
-            // Esportes
-            'FUTEBOL', 'BASQUETE', 'VOLEI', 'NATACAO', 'TENIS', 'ATLETISMO', 'CICLISMO', 'GINASTICA', 'SURF', 'BOXE',
-            // Tecnologia
-            'COMPUTADOR', 'INTERNET', 'SMARTPHONE', 'TABLET', 'BLUETOOTH', 'WIFI', 'SOFTWARE', 'HARDWARE', 'PROGRAMACAO', 'INTELIGENCIA',
-            // Cores
-            'VERMELHO', 'AZUL', 'VERDE', 'AMARELO', 'ROXO', 'LARANJA', 'MARROM', 'CINZA', 'PRETO', 'BRANCO',
-            // Instrumentos musicais
-            'VIOLAO', 'PIANO', 'BATERIA', 'FLAUTA', 'SAXOFONE', 'TROMPETE', 'VIOLINO', 'HARPA', 'ACORDEAO', 'TECLADO',
-            // Elementos químicos
-            'OXIGENIO', 'HIDROGENIO', 'CARBONO', 'FERRO', 'OURO', 'PRATA', 'COBRE', 'ALUMINIO', 'NITROGENIO', 'HELIO',
-            // Planetas
-            'MERCURIO', 'VENUS', 'TERRA', 'MARTE', 'JUPITER', 'SATURNO', 'URANO', 'NETUNO', 'PLUTAO'
-        ];
+        const palavras = {
+            animais: ['CACHORRO', 'GATO', 'ELEFANTE', 'LEAO', 'GIRAFA', 'ZEBRA', 'TIGRE', 'MACACO', 'PINGUIM', 'BALEIA'],
+            frutas: ['BANANA', 'MORANGO', 'ABACAXI', 'LARANJA', 'UVA', 'MELANCIA', 'KIWI', 'MANGA', 'PERA', 'CEREJA'],
+            paises: ['BRASIL', 'PORTUGAL', 'FRANCA', 'ALEMANHA', 'ITALIA', 'ESPANHA', 'JAPAO', 'CHINA', 'AUSTRALIA', 'CANADA'],
+            profissoes: ['MEDICO', 'PROFESSOR', 'ENGENHEIRO', 'ADVOGADO', 'COZINHEIRO', 'BOMBEIRO', 'POLICIAL', 'DENTISTA', 'ARQUITETO', 'JORNALISTA'],
+            esportes: ['FUTEBOL', 'BASQUETE', 'VOLEI', 'NATACAO', 'TENIS', 'ATLETISMO', 'CICLISMO', 'GINASTICA', 'SURF', 'BOXE'],
+            tecnologia: ['COMPUTADOR', 'INTERNET', 'SMARTPHONE', 'TABLET', 'BLUETOOTH', 'WIFI', 'SOFTWARE', 'HARDWARE', 'PROGRAMACAO', 'INTELIGENCIA'],
+            cores: ['VERMELHO', 'AZUL', 'VERDE', 'AMARELO', 'ROXO', 'LARANJA', 'MARROM', 'CINZA', 'PRETO', 'BRANCO'],
+            instrumentos: ['VIOLAO', 'PIANO', 'BATERIA', 'FLAUTA', 'SAXOFONE', 'TROMPETE', 'VIOLINO', 'HARPA', 'ACORDEAO', 'TECLADO'],
+            elementos: ['OXIGENIO', 'HIDROGENIO', 'CARBONO', 'FERRO', 'OURO', 'PRATA', 'COBRE', 'ALUMINIO', 'NITROGENIO', 'HELIO'],
+            planetas: ['MERCURIO', 'VENUS', 'TERRA', 'MARTE', 'JUPITER', 'SATURNO', 'URANO', 'NETUNO', 'PLUTAO']
+        };
+        
         let palavraEscolhida = '';
         let palavraOculta = [];
         const partesBoneco = [
@@ -210,9 +263,13 @@
         let tempoRestante = 60;
         let temporizador;
         let jogoIniciado = false;
+        let categoriaAtual = 'todas';
 
         function iniciarJogo() {
-            palavraEscolhida = palavras[Math.floor(Math.random() * palavras.length)];
+            let palavrasDisponiveis = categoriaAtual === 'todas' 
+                ? Object.values(palavras).flat() 
+                : palavras[categoriaAtual];
+            palavraEscolhida = palavrasDisponiveis[Math.floor(Math.random() * palavrasDisponiveis.length)];
             palavraOculta = Array(palavraEscolhida.length).fill('_');
             atualizarPalavra();
             criarBotoesLetras();
@@ -224,6 +281,9 @@
             document.getElementById('segundos').textContent = tempoRestante;
             clearInterval(temporizador);
             jogoIniciado = false;
+            document.getElementById('nome-categoria').textContent = categoriaAtual === 'todas' 
+                ? 'Todas' 
+                : categoriaAtual.charAt(0).toUpperCase() + categoriaAtual.slice(1);
         }
 
         function iniciarTemporizador() {
@@ -297,6 +357,17 @@
         }
 
         document.getElementById('novoJogo').addEventListener('click', iniciarJogo);
+
+        document.getElementById('tema-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            document.body.classList.toggle('dark-theme');
+        });
+
+        document.getElementById('categoria').addEventListener('change', (e) => {
+            categoriaAtual = e.target.value;
+            document.getElementById('nome-categoria').textContent = e.target.options[e.target.selectedIndex].text;
+            iniciarJogo();
+        });
 
         iniciarJogo();
     </script>
