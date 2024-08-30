@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        #pontuacao, #tempo {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #forca {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #forca line, #forca circle, #forca path {
+            stroke: #333;
+            stroke-width: 3;
+            fill: none;
+        }
+        #palavra {
+            font-size: 32px;
+            margin: 20px 0;
+            letter-spacing: 5px;
+            color: #444;
+        }
+        #letras {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        #letras button {
+            margin: 5px;
+            font-size: 18px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #letras button:hover {
+            background-color: #45a049;
+        }
+        #letras button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #mensagem {
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        #novoJogo {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #novoJogo:hover {
+            background-color: #45a049;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+        }
+        footer p {
+            margin: 5px 0;
+        }
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Hangman Game</h1>
+        
+        <div id="game-info">
+            <div id="pontuacao">Pontuação: <span id="pontos">0</span></div>
+            <div id="tempo">Tempo: <span id="segundos">60</span>s</div>
+        </div>
+        
+        <svg id="forca" viewBox="0 0 300 300">
+            <!-- Base -->
+            <line x1="50" y1="250" x2="150" y2="250" />
+            <!-- Poste -->
+            <line x1="100" y1="250" x2="100" y2="50" />
+            <!-- Topo -->
+            <line x1="100" y1="50" x2="200" y2="50" />
+            <!-- Corda -->
+            <line x1="200" y1="50" x2="200" y2="80" />
+            <!-- Cabeça -->
+            <circle id="cabeca" cx="200" cy="100" r="20" style="display: none;" />
+            <!-- Olho esquerdo -->
+            <circle id="olho-esq" cx="193" cy="95" r="3" style="display: none;" />
+            <!-- Olho direito -->
+            <circle id="olho-dir" cx="207" cy="95" r="3" style="display: none;" />
+            <!-- Nariz -->
+            <line id="nariz" x1="200" y1="100" x2="200" y2="105" style="display: none;" />
+            <!-- Boca -->
+            <path id="boca" d="M190 110 Q200 120 210 110" fill="none" style="display: none;" />
+            <!-- Orelha esquerda -->
+            <path id="orelha-esq" d="M180 100 Q175 105 180 110" style="display: none;" />
+            <!-- Orelha direita -->
+            <path id="orelha-dir" d="M220 100 Q225 105 220 110" style="display: none;" />
+            <!-- Cabelo -->
+            <path id="cabelo" d="M180 85 Q200 70 220 85" style="display: none;" />
+            <!-- Corpo -->
+            <line id="corpo" x1="200" y1="120" x2="200" y2="180" style="display: none;" />
+            <!-- Braço esquerdo -->
+            <line id="braco-esq" x1="200" y1="130" x2="170" y2="160" style="display: none;" />
+            <!-- Braço direito -->
+            <line id="braco-dir" x1="200" y1="130" x2="230" y2="160" style="display: none;" />
+            <!-- Perna esquerda -->
+            <line id="perna-esq" x1="200" y1="180" x2="170" y2="220" style="display: none;" />
+            <!-- Perna direita -->
+            <line id="perna-dir" x1="200" y1="180" x2="230" y2="220" style="display: none;" />
+        </svg>
+        
+        <div id="palavra"></div>
+        
+        <div id="letras"></div>
+        
+        <div id="mensagem"></div>
+        
+        <button id="novoJogo">Novo Jogo</button>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Hangman Game</p>
+        <p>Desenvolvido por <a href="#">Andrei Costa</a></p>
+    </footer>
+
+    <script>
+        const palavras = [
+            // Animais
+            'CACHORRO', 'GATO', 'ELEFANTE', 'LEAO', 'GIRAFA', 'ZEBRA', 'TIGRE', 'MACACO', 'PINGUIM', 'BALEIA',
+            // Frutas
+            'BANANA', 'MORANGO', 'ABACAXI', 'LARANJA', 'UVA', 'MELANCIA', 'KIWI', 'MANGA', 'PERA', 'CEREJA',
+            // Países
+            'BRASIL', 'PORTUGAL', 'FRANCA', 'ALEMANHA', 'ITALIA', 'ESPANHA', 'JAPAO', 'CHINA', 'AUSTRALIA', 'CANADA',
+            // Profissões
+            'MEDICO', 'PROFESSOR', 'ENGENHEIRO', 'ADVOGADO', 'COZINHEIRO', 'BOMBEIRO', 'POLICIAL', 'DENTISTA', 'ARQUITETO', 'JORNALISTA',
+            // Esportes
+            'FUTEBOL', 'BASQUETE', 'VOLEI', 'NATACAO', 'TENIS', 'ATLETISMO', 'CICLISMO', 'GINASTICA', 'SURF', 'BOXE',
+            // Tecnologia
+            'COMPUTADOR', 'INTERNET', 'SMARTPHONE', 'TABLET', 'BLUETOOTH', 'WIFI', 'SOFTWARE', 'HARDWARE', 'PROGRAMACAO', 'INTELIGENCIA',
+            // Cores
+            'VERMELHO', 'AZUL', 'VERDE', 'AMARELO', 'ROXO', 'LARANJA', 'MARROM', 'CINZA', 'PRETO', 'BRANCO',
+            // Instrumentos musicais
+            'VIOLAO', 'PIANO', 'BATERIA', 'FLAUTA', 'SAXOFONE', 'TROMPETE', 'VIOLINO', 'HARPA', 'ACORDEAO', 'TECLADO',
+            // Elementos químicos
+            'OXIGENIO', 'HIDROGENIO', 'CARBONO', 'FERRO', 'OURO', 'PRATA', 'COBRE', 'ALUMINIO', 'NITROGENIO', 'HELIO',
+            // Planetas
+            'MERCURIO', 'VENUS', 'TERRA', 'MARTE', 'JUPITER', 'SATURNO', 'URANO', 'NETUNO', 'PLUTAO'
+        ];
+        let palavraEscolhida = '';
+        let palavraOculta = [];
+        const partesBoneco = [
+            'cabeca', 'olho-esq', 'olho-dir', 'nariz', 'boca', 'orelha-esq', 'orelha-dir', 'cabelo',
+            'corpo', 'braco-esq', 'braco-dir', 'perna-esq', 'perna-dir'
+        ];
+        let tentativas = partesBoneco.length;
+        let pontuacao = 0;
+        let tempoRestante = 60;
+        let temporizador;
+        let jogoIniciado = false;
+
+        function iniciarJogo() {
+            palavraEscolhida = palavras[Math.floor(Math.random() * palavras.length)];
+            palavraOculta = Array(palavraEscolhida.length).fill('_');
+            atualizarPalavra();
+            criarBotoesLetras();
+            tentativas = partesBoneco.length;
+            partesBoneco.forEach(parte => document.getElementById(parte).style.display = 'none');
+            document.getElementById('mensagem').textContent = '';
+            document.getElementById('pontos').textContent = pontuacao;
+            tempoRestante = 60;
+            document.getElementById('segundos').textContent = tempoRestante;
+            clearInterval(temporizador);
+            jogoIniciado = false;
+        }
+
+        function iniciarTemporizador() {
+            if (!jogoIniciado) {
+                jogoIniciado = true;
+                temporizador = setInterval(atualizarTempo, 1000);
+            }
+        }
+
+        function atualizarTempo() {
+            tempoRestante--;
+            document.getElementById('segundos').textContent = tempoRestante;
+            if (tempoRestante <= 0) {
+                clearInterval(temporizador);
+                finalizarJogo(false);
+            }
+        }
+
+        function atualizarPalavra() {
+            document.getElementById('palavra').textContent = palavraOculta.join(' ');
+        }
+
+        function criarBotoesLetras() {
+            const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const divLetras = document.getElementById('letras');
+            divLetras.innerHTML = '';
+            for (let letra of letras) {
+                const botao = document.createElement('button');
+                botao.textContent = letra;
+                botao.onclick = () => {
+                    iniciarTemporizador();
+                    tentarLetra(letra);
+                };
+                divLetras.appendChild(botao);
+            }
+        }
+
+        function tentarLetra(letra) {
+            if (palavraEscolhida.includes(letra)) {
+                for (let i = 0; i < palavraEscolhida.length; i++) {
+                    if (palavraEscolhida[i] === letra) {
+                        palavraOculta[i] = letra;
+                    }
+                }
+                atualizarPalavra();
+                pontuacao += 10;
+                document.getElementById('pontos').textContent = pontuacao;
+                if (!palavraOculta.includes('_')) {
+                    finalizarJogo(true);
+                }
+            } else {
+                tentativas--;
+                document.getElementById(partesBoneco[partesBoneco.length - 1 - tentativas]).style.display = 'block';
+                if (tentativas === 0) {
+                    finalizarJogo(false);
+                }
+            }
+            event.target.disabled = true;
+        }
+
+        function finalizarJogo(vitoria) {
+            clearInterval(temporizador);
+            if (vitoria) {
+                document.getElementById('mensagem').textContent = 'Parabéns! Você venceu!';
+                pontuacao += tempoRestante;
+            } else {
+                document.getElementById('mensagem').textContent = 'Game Over! A palavra era: ' + palavraEscolhida;
+            }
+            document.getElementById('pontos').textContent = pontuacao;
+            document.querySelectorAll('#letras button').forEach(btn => btn.disabled = true);
+        }
+
+        document.getElementById('novoJogo').addEventListener('click', iniciarJogo);
+
+        iniciarJogo();
+    </script>
+</body>
+</html>
